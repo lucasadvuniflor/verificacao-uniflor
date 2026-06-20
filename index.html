@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Verificação de Relatórios — Procuradoria Jurídica de Uniflor/PR</title>
+<style>
+  :root {
+    --verde: #1a7f37;
+    --vermelho: #c0341d;
+    --azul: #0b4f8a;
+    --cinza: #555;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 60px;
+    color: #1a1a1a;
+    background: #fafafa;
+  }
+  header { text-align: center; margin-bottom: 24px; }
+  header h1 { font-size: 1.3rem; margin-bottom: 4px; }
+  header p { color: var(--cinza); font-size: 0.9rem; margin: 2px 0; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+  }
+
+  #dropzone {
+    border: 2px dashed #aaa;
+    border-radius: 10px;
+    padding: 40px 16px;
+    text-align: center;
+    color: var(--cinza);
+    cursor: pointer;
+    transition: border-color .15s, background .15s;
+  }
+  #dropzone.dragover { border-color: var(--azul); background: #eef5fc; }
+  #dropzone input { display: none; }
+
+  #resultado { margin-top: 20px; display: none; }
+  .resultado-ok, .resultado-erro {
+    border-radius: 10px;
+    padding: 16px;
+    font-weight: 600;
+  }
+  .resultado-ok { background: #e6f4ea; color: var(--verde); border: 1px solid #b7e0c4; }
+  .resultado-erro { background: #fbe9e7; color: var(--vermelho); border: 1px solid #f3c2b8; }
+  .detalhe { font-weight: 400; font-size: 0.85rem; color: var(--cinza); margin-top: 8px; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th, td { text-align: left; padding: 8px 6px; border-bottom: 1px solid #eee; }
+  th { color: var(--cinza); font-weight: 600; }
+  .hash-curto { font-family: monospace; }
+
+  footer { text-align: center; color: var(--cinza); font-size: 0.78rem; margin-top: 32px; }
+  a { color: var(--azul); }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Verificação Pública de Relatórios de Atividades</h1>
+  <p>Procuradoria Jurídica de Uniflor/PR — Lucas Mater, OAB/PR 97.525</p>
+  <p>Processo de referência nº 0000901-70.2026.8.16.0119</p>
+</header>
+
+<div class="card">
+  <h2 style="margin-top:0;">Como funciona</h2>
+  <p>
+    Todos os dias, ao final do expediente, um relatório de atividades é gerado e seu
+    código de verificação (<em>hash</em>) é publicado nesta página, de forma pública e
+    permanente. Esse código funciona como uma "impressão digital" do arquivo: qualquer
+    alteração no documento — mesmo de uma única letra — muda completamente esse código.
+  </p>
+  <p>
+    Para confirmar que um relatório é autêntico e não foi alterado, basta soltar o
+    arquivo <code>.docx</code> recebido na área abaixo. A verificação ocorre inteiramente
+    no seu navegador — nenhum arquivo é enviado a qualquer servidor.
+  </p>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0;">Verificar um relatório</h2>
+  <div id="dropzone">
+    <p>Arraste o arquivo .docx aqui, ou clique para selecionar</p>
+    <input type="file" id="arquivo" accept=".docx">
+  </div>
+  <div id="resultado"></div>
+</div>
+
+<div class="card">
+  <h2 style="margin-top:0;">Registros publicados</h2>
+  <table>
+    <thead><tr><th>Data</th><th>Gerado em</th><th>Hash (início)</th></tr></thead>
+    <tbody id="tabela-registros"></tbody>
+  </table>
+</div>
+
+<footer>
+  Página estática, sem backend. Código-fonte e histórico de alterações públicos em
+  <a href="https://github.com/lucasadvuniflor/verificacao-uniflor">github.com/lucasadvuniflor/verificacao-uniflor</a>.
+</footer>
+
+<script>
+async function sha256(arrayBuffer) {
+  const hashBuffer = await crypto.subtle.digest("SHA-256", arrayBuffer);
+  return Array.from(new Uint8Array(hashBuffer))
+    .map(b => b.toString(16).padStart(2, "0")).join("");
+}
+
+function paramsData() {
+  return new URLSearchParams(window.location.search).get("data");
+}
+
+let registros = [];
+
+async function carregarRegistros() {
+  const resp = await fetch("registros.json", { cache: "no-store" });
+  registros = await resp.json();
+  const tbody = document.getElementById("tabela-registros");
+  tbody.innerHTML = "";
+  registros.slice().reverse().forEach(r => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `<td>${r.data}</td><td>${r.gerado_em}</td><td class="hash-curto">${r.hash.slice(0,16)}…</td>`;
+    tbody.appendChild(tr);
+  });
+}
+
+function mostrarResultado(ok, mensagem, detalhe) {
+  const div = document.getElementById("resultado");
+  div.style.display = "block";
+  div.innerHTML = `<div class="${ok ? 'resultado-ok' : 'resultado-erro'}">
+    ${ok ? "✅" : "❌"} ${mensagem}
+    <div class="detalhe">${detalhe}</div>
+  </div>`;
+}
+
+async function verificarArquivo(file) {
+  const buffer = await file.arrayBuffer();
+  const hash = await sha256(buffer);
+  const dataAlvo = paramsData();
+
+  const candidatos = dataAlvo ? registros.filter(r => r.data === dataAlvo) : registros;
+  const encontrado = candidatos.find(r => r.hash === hash) || registros.find(r => r.hash === hash);
+
+  if (encontrado) {
+    mostrarResultado(true,
+      `Documento íntegro e autêntico — gerado em ${encontrado.gerado_em}.`,
+      `Hash verificado: ${hash}`);
+  } else {
+    mostrarResultado(false,
+      "Este arquivo NÃO corresponde a nenhum registro publicado.",
+      `Hash calculado: ${hash}<br>Isso significa que o conteúdo foi alterado, ou o arquivo não é um relatório oficial publicado.`);
+  }
+}
+
+const dropzone = document.getElementById("dropzone");
+const input = document.getElementById("arquivo");
+
+dropzone.addEventListener("click", () => input.click());
+input.addEventListener("change", e => { if (e.target.files[0]) verificarArquivo(e.target.files[0]); });
+
+["dragover", "dragenter"].forEach(ev => dropzone.addEventListener(ev, e => {
+  e.preventDefault(); dropzone.classList.add("dragover");
+}));
+["dragleave", "drop"].forEach(ev => dropzone.addEventListener(ev, e => {
+  e.preventDefault(); dropzone.classList.remove("dragover");
+}));
+dropzone.addEventListener("drop", e => {
+  const file = e.dataTransfer.files[0];
+  if (file) verificarArquivo(file);
+});
+
+carregarRegistros();
+</script>
+
+</body>
+</html>
