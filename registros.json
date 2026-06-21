@@ -7,14 +7,15 @@
   },
   {
     "data": "2026-06-21",
-    "hash": "1f7cea3e8ac67b24fcbfe47ac33f1e99daae0c8fa6eb61939258a0113fa05e20",
-    "gerado_em": "21/06/2026 15:01",
+    "hash": "5f2dd892b28aa76a613b37277484dc87990d96f1a2b199cd8eb96775ab855a77",
+    "gerado_em": "21/06/2026 15:20",
     "processo": "0000901-70.2026.8.16.0119",
     "resumo": {
       "horas_trabalhadas": "1h48min",
       "documentos_elaborados": 0,
       "sistemas_acessados": [],
-      "periodo": "08:00 - 15:01"
+      "arquivos_modificados": 0,
+      "periodo": "08:00 - 15:20"
     }
   }
 ]
