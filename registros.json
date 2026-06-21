@@ -7,8 +7,14 @@
   },
   {
     "data": "2026-06-21",
-    "hash": "b677c9c6028fe2f3266a668cd3b78d5e0fe6793ce5c6f76a1dd7f022a0601100",
-    "gerado_em": "21/06/2026 12:31",
-    "processo": "0000901-70.2026.8.16.0119"
+    "hash": "de5463a8deca032256709814f53393864e753c7ab67f9b24bb32aac852b39360",
+    "gerado_em": "21/06/2026 14:00",
+    "processo": "0000901-70.2026.8.16.0119",
+    "resumo": {
+      "horas_trabalhadas": "1h48min",
+      "documentos_elaborados": 0,
+      "sistemas_acessados": [],
+      "periodo": "08:00 - 14:00"
+    }
   }
 ]
