@@ -17,5 +17,18 @@
       "arquivos_modificados": 0,
       "periodo": "08:00 - 15:20"
     }
+  },
+  {
+    "data": "2026-06-22",
+    "hash": "442027e16ac824133a887f3ebe78d309fb3834a0796103b9ecbcaf219d39d862",
+    "gerado_em": "22/06/2026 16:30",
+    "processo": "0000901-70.2026.8.16.0119",
+    "resumo": {
+      "horas_trabalhadas": "0h19min",
+      "documentos_elaborados": 0,
+      "sistemas_acessados": [],
+      "arquivos_modificados": 0,
+      "periodo": "08:00 - 16:30"
+    }
   }
 ]
